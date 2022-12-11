@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2021  Gaurav Ujjwal.
+  ~
+  ~ SPDX-License-Identifier:  GPL-3.0-or-later
+  ~
+  ~ See COPYING.txt for more details.
+  -->
+
+<!--
+ -  This is common server view, used by both saved and discovered server items.
+ -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="com.gaurav.avnc.model.ServerProfile" />
+
+        <variable
+            name="profile"
+            type="com.gaurav.avnc.model.ServerProfile" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="@{profile.name}"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Example Server Name" />
+
+        <TextView
+            android:id="@+id/address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_small"
+            android:text='@{profile.host + (profile.port == 5900 ? "" :  " | " + profile.port) }'
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/name"
+            tools:text="192.168.1.1 | 5901" />
+
+        <ImageView
+            android:id="@+id/password_hint_icon"
+            android:layout_width="@dimen/server_card_hint_icon_size"
+            android:layout_height="@dimen/server_card_hint_icon_size"
+            android:layout_margin="@dimen/margin_normal"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_key"
+            android:tintMode="src_in"
+            app:isVisible="@{profile.password.length() != 0}"
+            app:layout_constraintBottom_toBottomOf="@id/address"
+            app:layout_constraintStart_toEndOf="@id/address"
+            app:layout_constraintTop_toTopOf="@id/address"
+            app:tint="?android:textColorSecondary" />
+
+        <ImageView
+            android:id="@+id/view_only_hint_icon"
+            android:layout_width="@dimen/server_card_hint_icon_size"
+            android:layout_height="@dimen/server_card_hint_icon_size"
+            android:layout_margin="@dimen/margin_normal"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_visibility"
+            android:tintMode="src_in"
+            app:isVisible="@{profile.viewOnly}"
+            app:layout_constraintBottom_toBottomOf="@id/address"
+            app:layout_constraintStart_toEndOf="@id/password_hint_icon"
+            app:layout_constraintTop_toTopOf="@id/address"
+            app:tint="?android:textColorSecondary" />
+
+        <ImageView
+            android:layout_width="@dimen/server_card_hint_icon_size"
+            android:layout_height="@dimen/server_card_hint_icon_size"
+            android:layout_margin="@dimen/margin_normal"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_ssh"
+            android:tintMode="src_in"
+            app:isVisible="@{profile.channelType == ServerProfile.CHANNEL_SSH_TUNNEL}"
+            app:layout_constraintBottom_toBottomOf="@id/address"
+            app:layout_constraintStart_toEndOf="@id/view_only_hint_icon"
+            app:layout_constraintTop_toTopOf="@id/address"
+            app:tint="?android:textColorSecondary" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

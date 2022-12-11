@@ -1,0 +1,3 @@
+* Portekizce (BR) çeviri eklendi (inkhorn tarafından)
+* Yerel Android imlecini gizleme seçeneği eklendi (Henry H tarafından)
+* Bazı aygıtlarda kalemle vurgulama davranışı düzeltildi (Henry H tarafından)

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020  Gaurav Ujjwal.
+  ~
+  ~ SPDX-License-Identifier:  GPL-3.0-or-later
+  ~
+  ~ See COPYING.txt for more details.
+  -->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.gaurav.avnc">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:name=".App"
+        android:allowBackup="true"
+        android:fullBackupContent="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+
+        <activity-alias
+            android:name=".StartupActivity"
+            android:exported="true"
+            android:targetActivity=".ui.home.SplashActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".UriReceiverActivity"
+            android:exported="true"
+            android:targetActivity=".ui.vnc.UriReceiverActivity">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="vnc" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity
+            android:name=".ui.home.SplashActivity"
+            android:theme="@style/SplashTheme" />
+
+        <activity android:name=".ui.home.HomeActivity" />
+
+        <activity
+            android:name=".ui.home.UrlBarActivity"
+            android:parentActivityName=".ui.home.HomeActivity"
+            android:windowSoftInputMode="stateVisible" />
+
+        <activity
+            android:name=".ui.vnc.VncActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:resizeableActivity="true"
+            android:supportsPictureInPicture="true"
+            tools:ignore="UnusedAttribute" />
+
+        <activity android:name=".ui.vnc.UriReceiverActivity" />
+
+        <activity android:name=".ui.prefs.PrefsActivity" />
+
+        <activity android:name=".ui.about.AboutActivity" />
+    </application>
+
+</manifest>

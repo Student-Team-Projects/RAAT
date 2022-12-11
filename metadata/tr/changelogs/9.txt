@@ -1,0 +1,9 @@
+* Oturum açma otomatik tamamlaması iyileştirildi
+* Sunucu keşfi iyileştirildi
+* Yeni diller:
+     Sırpça (Саша Петровић tarafından)
+     Ukraynaca (Andrij Mizyk tarafından)
+* Güncellenen diller:
+     Bokmål Norveççe (Allan Nordhøy tarafından)
+     Farsça (Eshagh Shahedany tarafından)
+     Fransızca (J. Lavoie, Nathan tarafından)
