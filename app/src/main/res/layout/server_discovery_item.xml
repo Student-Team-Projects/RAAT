@@ -13,7 +13,7 @@
 
         <variable
             name="viewModel"
-            type="com.gaurav.avnc.model.ServerProfile" />
+            type="com.tcs.raat.model.ServerProfile" />
     </data>
 
     <com.google.android.material.card.MaterialCardView

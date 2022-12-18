@@ -21,7 +21,7 @@
 
         <variable
             name="h"
-            type="com.gaurav.avnc.ui.vnc.KeyHandler" />
+            type="com.tcs.raat.ui.vnc.KeyHandler" />
     </data>
 
     <HorizontalScrollView

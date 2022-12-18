@@ -14,7 +14,7 @@
 
         <variable
             name="profile"
-            type="com.gaurav.avnc.model.ServerProfile" />
+            type="com.tcs.raat.model.ServerProfile" />
 
         <variable
             name="isPrivateKeyEncrypted"
@@ -215,7 +215,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@id/gesture_style" />
 
-                <com.gaurav.avnc.util.SpinnerEx
+                <com.tcs.raat.util.SpinnerEx
                     android:id="@+id/gesture_style"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -239,7 +239,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@id/security" />
 
-                <com.gaurav.avnc.util.SpinnerEx
+                <com.tcs.raat.util.SpinnerEx
                     android:id="@+id/security"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"

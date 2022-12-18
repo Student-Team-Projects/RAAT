@@ -14,7 +14,7 @@
 
         <variable
             name="viewModel"
-            type="com.gaurav.avnc.model.ServerProfile" />
+            type="com.tcs.raat.model.ServerProfile" />
     </data>
 
     <com.google.android.material.card.MaterialCardView
@@ -26,7 +26,7 @@
             layout="@layout/server_item"
             app:profile="@{viewModel}" />
 
-        <com.gaurav.avnc.ui.home.IndicatorView
+        <com.tcs.raat.ui.home.IndicatorView
             android:id="@+id/indicator"
             android:layout_width="10dp"
             android:layout_height="10dp"

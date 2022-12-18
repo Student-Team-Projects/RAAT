@@ -8,7 +8,7 @@ android {
     compileSdkVersion 33
 
     defaultConfig {
-        applicationId "com.gaurav.avnc"
+        applicationId "com.tcs.avnc"
         minSdkVersion 21
         targetSdkVersion 33
         versionCode 16

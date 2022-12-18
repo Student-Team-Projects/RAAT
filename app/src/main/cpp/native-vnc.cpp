@@ -57,7 +57,7 @@ JNI_OnUnload(JavaVM *vm, void *reserved) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_gaurav_avnc_vnc_VncClient_initLibrary(JNIEnv *env, jclass clazz) {
+Java_com_tcs_raat_vnc_VncClient_initLibrary(JNIEnv *env, jclass clazz) {
     context.managedCls = (jclass) env->NewGlobalRef(clazz);
     context.cbFramebufferUpdated = env->GetMethodID(clazz, "cbFinishedFrameBufferUpdate", "()V");
     //TODO: Cache more method IDs so we don't have to repeatedly search them
@@ -95,7 +95,7 @@ static rfbCredential *onGetCredential(rfbClient *client, int credentialType) {
 
     //Retrieve credentials
     jmethodID mid = env->GetMethodID(cls, "cbGetCredential",
-                                     "()Lcom/gaurav/avnc/vnc/UserCredential;");
+                                     "()Lcom/tcs/raat/vnc/UserCredential;");
     jobject jCredential = env->CallObjectMethod(obj, mid);
     if (jCredential == nullptr) {
         return nullptr;
@@ -245,7 +245,7 @@ static void setCallbacks(rfbClient *client) {
 
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_com_gaurav_avnc_vnc_VncClient_nativeClientCreate(JNIEnv *env, jobject thiz) {
+Java_com_tcs_raat_vnc_VncClient_nativeClientCreate(JNIEnv *env, jobject thiz) {
     rfbClient *client = rfbGetClient(8, 3, 4);
     if (client == nullptr)
         return 0;
@@ -265,7 +265,7 @@ Java_com_gaurav_avnc_vnc_VncClient_nativeClientCreate(JNIEnv *env, jobject thiz)
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_gaurav_avnc_vnc_VncClient_nativeConfigure(JNIEnv *env, jobject thiz, jlong client_ptr,
+Java_com_tcs_raat_vnc_VncClient_nativeConfigure(JNIEnv *env, jobject thiz, jlong client_ptr,
                                                    jint securityType, jboolean use_local_cursor, jint image_quality,
                                                    jboolean use_raw_encoding) {
     auto client = (rfbClient *) client_ptr;
@@ -288,7 +288,7 @@ Java_com_gaurav_avnc_vnc_VncClient_nativeConfigure(JNIEnv *env, jobject thiz, jl
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_gaurav_avnc_vnc_VncClient_nativeSetDest(JNIEnv *env, jobject thiz, jlong client_ptr,
+Java_com_tcs_raat_vnc_VncClient_nativeSetDest(JNIEnv *env, jobject thiz, jlong client_ptr,
                                                  jstring host, jint port) {
     auto client = (rfbClient *) client_ptr;
     client->destHost = getNativeStrCopy(env, host);
@@ -297,7 +297,7 @@ Java_com_gaurav_avnc_vnc_VncClient_nativeSetDest(JNIEnv *env, jobject thiz, jlon
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_gaurav_avnc_vnc_VncClient_nativeInit(JNIEnv *env, jobject thiz, jlong client_ptr,
+Java_com_tcs_raat_vnc_VncClient_nativeInit(JNIEnv *env, jobject thiz, jlong client_ptr,
                                               jstring host, jint port) {
     auto client = (rfbClient *) client_ptr;
 
@@ -314,7 +314,7 @@ Java_com_gaurav_avnc_vnc_VncClient_nativeInit(JNIEnv *env, jobject thiz, jlong c
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_gaurav_avnc_vnc_VncClient_nativeCleanup(JNIEnv *env, jobject thiz,
+Java_com_tcs_raat_vnc_VncClient_nativeCleanup(JNIEnv *env, jobject thiz,
                                                  jlong client_ptr) {
     auto client = (rfbClient *) client_ptr;
 
@@ -332,7 +332,7 @@ Java_com_gaurav_avnc_vnc_VncClient_nativeCleanup(JNIEnv *env, jobject thiz,
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_gaurav_avnc_vnc_VncClient_nativeProcessServerMessage(JNIEnv *env, jobject thiz,
+Java_com_tcs_raat_vnc_VncClient_nativeProcessServerMessage(JNIEnv *env, jobject thiz,
                                                               jlong client_ptr,
                                                               jint u_sec_timeout) {
     auto client = (rfbClient *) client_ptr;
@@ -350,28 +350,28 @@ Java_com_gaurav_avnc_vnc_VncClient_nativeProcessServerMessage(JNIEnv *env, jobje
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_com_gaurav_avnc_vnc_VncClient_nativeGetLastErrorStr(JNIEnv *env, jobject thiz) {
+Java_com_tcs_raat_vnc_VncClient_nativeGetLastErrorStr(JNIEnv *env, jobject thiz) {
     auto str = errnoToStr(errno);
     return env->NewStringUTF(str);
 }
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_gaurav_avnc_vnc_VncClient_nativeSendKeyEvent(JNIEnv *env, jobject thiz, jlong client_ptr,
+Java_com_tcs_raat_vnc_VncClient_nativeSendKeyEvent(JNIEnv *env, jobject thiz, jlong client_ptr,
                                                       jlong key, jboolean is_down) {
     return (jboolean) SendKeyEvent((rfbClient *) client_ptr, (uint32_t) key, is_down ? TRUE : FALSE);
 }
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_gaurav_avnc_vnc_VncClient_nativeSendPointerEvent(JNIEnv *env, jobject thiz, jlong client_ptr, jint x, jint y,
+Java_com_tcs_raat_vnc_VncClient_nativeSendPointerEvent(JNIEnv *env, jobject thiz, jlong client_ptr, jint x, jint y,
                                                           jint mask) {
     return (jboolean) SendPointerEvent((rfbClient *) client_ptr, x, y, mask);
 }
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_gaurav_avnc_vnc_VncClient_nativeSendCutText(JNIEnv *env, jobject thiz, jlong client_ptr, jbyteArray bytes) {
+Java_com_tcs_raat_vnc_VncClient_nativeSendCutText(JNIEnv *env, jobject thiz, jlong client_ptr, jbyteArray bytes) {
     auto textBuffer = env->GetByteArrayElements(bytes, nullptr);
     auto textLen = env->GetArrayLength(bytes);
     auto textChars = reinterpret_cast<char *>(textBuffer);
@@ -384,39 +384,39 @@ Java_com_gaurav_avnc_vnc_VncClient_nativeSendCutText(JNIEnv *env, jobject thiz, 
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_gaurav_avnc_vnc_VncClient_nativeRefreshFrameBuffer(JNIEnv *env, jobject thiz, jlong clientPtr) {
+Java_com_tcs_raat_vnc_VncClient_nativeRefreshFrameBuffer(JNIEnv *env, jobject thiz, jlong clientPtr) {
     auto client = (rfbClient *) clientPtr;
     return (jboolean) SendFramebufferUpdateRequest(client, 0, 0, client->width, client->height, FALSE);
 }
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_com_gaurav_avnc_vnc_VncClient_nativeGetDesktopName(JNIEnv *env, jobject thiz, jlong client_ptr) {
+Java_com_tcs_raat_vnc_VncClient_nativeGetDesktopName(JNIEnv *env, jobject thiz, jlong client_ptr) {
     auto client = (rfbClient *) client_ptr;
     return env->NewStringUTF(client->desktopName ? client->desktopName : "");
 }
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_gaurav_avnc_vnc_VncClient_nativeGetWidth(JNIEnv *env, jobject thiz, jlong client_ptr) {
+Java_com_tcs_raat_vnc_VncClient_nativeGetWidth(JNIEnv *env, jobject thiz, jlong client_ptr) {
     return ((rfbClient *) client_ptr)->width;
 }
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_gaurav_avnc_vnc_VncClient_nativeGetHeight(JNIEnv *env, jobject thiz, jlong client_ptr) {
+Java_com_tcs_raat_vnc_VncClient_nativeGetHeight(JNIEnv *env, jobject thiz, jlong client_ptr) {
     return ((rfbClient *) client_ptr)->height;
 }
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_gaurav_avnc_vnc_VncClient_nativeIsEncrypted(JNIEnv *env, jobject thiz, jlong client_ptr) {
+Java_com_tcs_raat_vnc_VncClient_nativeIsEncrypted(JNIEnv *env, jobject thiz, jlong client_ptr) {
     return static_cast<jboolean>(((rfbClient *) client_ptr)->tlsSession ? JNI_TRUE : JNI_FALSE);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_gaurav_avnc_vnc_VncClient_nativeUploadFrameTexture(JNIEnv *env, jobject thiz,
+Java_com_tcs_raat_vnc_VncClient_nativeUploadFrameTexture(JNIEnv *env, jobject thiz,
                                                             jlong client_ptr) {
     auto client = (rfbClient *) client_ptr;
     auto ex = getClientExtension(client);
@@ -440,7 +440,7 @@ Java_com_gaurav_avnc_vnc_VncClient_nativeUploadFrameTexture(JNIEnv *env, jobject
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_gaurav_avnc_vnc_VncClient_nativeUploadCursor(JNIEnv *env, jobject thiz, jlong client_ptr, jint px, jint py) {
+Java_com_tcs_raat_vnc_VncClient_nativeUploadCursor(JNIEnv *env, jobject thiz, jlong client_ptr, jint px, jint py) {
 
     auto client = (rfbClient *) client_ptr;
     auto ex = getClientExtension(client);

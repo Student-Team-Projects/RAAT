@@ -15,10 +15,10 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 
--keep,includedescriptorclasses class com.gaurav.avnc.**$$serializer { *; }
--keepclassmembers class com.gaurav.avnc.** {
+-keep,includedescriptorclasses class com.tcs.raat.**$$serializer { *; }
+-keepclassmembers class com.tcs.raat.** {
     *** Companion;
 }
--keepclasseswithmembers class com.gaurav.avnc.** {
+-keepclasseswithmembers class com.tcs.raat.** {
     kotlinx.serialization.KSerializer serializer(...);
 }

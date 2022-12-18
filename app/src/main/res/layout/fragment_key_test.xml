@@ -38,7 +38,7 @@
                 android:imeOptions="flagNoExtractUi|flagNoFullscreen"
                 android:inputType="text" />
 
-            <com.gaurav.avnc.ui.prefs.KeyTestView
+            <com.tcs.raat.ui.prefs.KeyTestView
                 android:id="@+id/input_area"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

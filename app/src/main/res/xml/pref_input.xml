@@ -14,7 +14,7 @@
         app:icon="@drawable/ic_gesture"
         app:title="@string/pref_gesture">
 
-        <com.gaurav.avnc.ui.prefs.ListPreferenceEx
+        <com.tcs.raat.ui.prefs.ListPreferenceEx
             app:defaultValue="touchscreen"
             app:entries="@array/gesture_style_entries"
             app:entryValues="@array/gesture_style_values"
@@ -47,7 +47,7 @@
             app:title="@string/pref_two_finger_tap"
             app:useSimpleSummaryProvider="true" />
 
-        <com.gaurav.avnc.ui.prefs.ListPreferenceEx
+        <com.tcs.raat.ui.prefs.ListPreferenceEx
             app:defaultValue="pan"
             app:entries="@array/swipe1_action_entries"
             app:entryValues="@array/swipe1_action_values"
@@ -63,7 +63,7 @@
             app:title="@string/pref_swipe2"
             app:useSimpleSummaryProvider="true" />
 
-        <com.gaurav.avnc.ui.prefs.ListPreferenceEx
+        <com.tcs.raat.ui.prefs.ListPreferenceEx
             app:defaultValue="none"
             app:entries="@array/drag_action_entries"
             app:entryValues="@array/drag_action_values"

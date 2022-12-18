@@ -15,11 +15,11 @@
 
     <data>
 
-        <import type="com.gaurav.avnc.model.ServerProfile" />
+        <import type="com.tcs.raat.model.ServerProfile" />
 
         <variable
             name="profile"
-            type="com.gaurav.avnc.model.ServerProfile" />
+            type="com.tcs.raat.model.ServerProfile" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
