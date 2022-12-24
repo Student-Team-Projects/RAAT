@@ -39,3 +39,6 @@ gastest.o
 
 #Private data
 private/
+
+#Macos local files
+.DS_Store
