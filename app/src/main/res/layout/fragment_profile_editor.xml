@@ -6,13 +6,18 @@
   ~ See COPYING.txt for more details.
   -->
 
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
 
     <data>
-
         <variable
             name="profile"
             type="com.tcs.raat.model.ServerProfile" />
+
+        <variable
+            name="isPrivateKeyEncrypted"
+            type="boolean" />
     </data>
 
     <ScrollView
@@ -84,6 +89,123 @@
                 android:hint="@string/hint_password"
                 android:inputType="textPassword"
                 android:text="@={profile.password}" />
+
+            <EditText
+                android:id="@+id/geometry"
+                android:inputType="textNoSuggestions"
+                android:digits="0123456789x"
+                style="@style/FormField.EditText"
+                android:layout_width="match_parent"
+                android:hint="@string/hint_geometry"
+                android:text="@={profile.geometry}" />
+
+            <!-- SSH options -->
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/use_ssh_tunnel"
+                style="@style/FormField.CheckBox"
+                android:text="@string/title_use_ssh_tunnel" />
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <!--SSH Host-->
+                <EditText
+                    android:id="@+id/ssh_host"
+                    android:layout_weight="0.8"
+                    style="@style/FormField.EditText"
+                    android:drawableStart="@drawable/ic_computer"
+                    android:hint='@{"SSH " + @string/hint_host}'
+                    android:importantForAutofill="no"
+                    android:inputType="textUri"
+                    android:text="@={profile.sshHost}" />
+
+                <!--Port-->
+                <EditText
+                    android:id="@+id/ssh_port"
+                    android:layout_weight="0.2"
+                    style="@style/FormField.EditText"
+                    android:hint='@{"SSH " + @string/hint_port}'
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    android:text='@={"" + profile.sshPort}' />
+            </LinearLayout>
+
+                <!--Username-->
+            <EditText
+                android:id="@+id/ssh_username"
+                android:layout_width="match_parent"
+                style="@style/FormField.EditText"
+                android:autofillHints="username"
+                android:drawableStart="@drawable/ic_person"
+                android:hint="@string/hint_username"
+                android:inputType="text"
+                android:text="@={profile.sshUsername}" />
+
+            <!--Auth Type-->
+            <RadioGroup
+                android:id="@+id/ssh_auth_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/FormField"
+                android:orientation="horizontal"
+                android:paddingTop="@dimen/padding_small" >
+
+                <RadioButton
+                    android:id="@+id/ssh_auth_type_key"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/title_private_key" />
+
+                <RadioButton
+                    android:id="@+id/ssh_auth_type_password"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/title_password" />
+            </RadioGroup>
+
+            <!--Password-->
+            <EditText
+                android:id="@+id/ssh_password"
+                style="@style/FormField.EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints="password"
+                android:drawableStart="@drawable/ic_password"
+                android:hint="@string/hint_password"
+                android:inputType="textPassword"
+                android:text="@={profile.sshPassword}"
+                app:isVisible="@{sshAuthTypePassword.checked}" />
+
+            <!--Private Key Import-->
+            <Button
+                android:id="@+id/key_import_btn"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_normal"
+                android:text="@{profile.sshPrivateKey.empty ? @string/title_import : @string/title_change}"
+                app:icon="@drawable/ic_file"
+                app:isVisible="@{sshAuthTypeKey.checked}" />
+
+            <!--Key Password-->
+            <EditText
+                android:id="@+id/ssh_key_password"
+                style="@style/FormField.EditText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:autofillHints="password"
+                android:drawableStart="@drawable/ic_password"
+                android:hint="@string/hint_key_password"
+                android:inputType="textPassword"
+                android:text="@={profile.sshPrivateKeyPassword}"
+                app:isVisible="@{sshAuthTypeKey.checked &amp;&amp; isPrivateKeyEncrypted}" />
         </LinearLayout>
     </ScrollView>
 </layout>

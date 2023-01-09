@@ -9,23 +9,22 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 
-fun testSSHConnection(profile: ServerProfile) {
-    GlobalScope.launch(Dispatchers.IO) {
-        val port = 22
+fun openVNCServer(profile: ServerProfile) {
+    GlobalScope.launch(Dispatchers.Default) {
         try {
             val jsch = JSch()
-            val session = jsch.getSession(profile.username, profile.host, port)
-            session.setPassword(profile.password)
+            val session = jsch.getSession(profile.sshUsername, profile.sshHost, profile.sshPort)
+            session.setPassword(profile.sshPassword)
             session.setConfig("StrictHostKeyChecking", "no")
             session.setTimeout(10000)
             session.connect()
             val channel: (ChannelExec) = session.openChannel("exec") as ChannelExec
-            channel.setCommand("touch ~/newfile")
+            channel.setCommand("Xvnc -geometry ${profile.geometry} -rfbauth ~/.vnc/passwd :1 &\n" +
+                               "DISPLAY=:1 cinnamon-session &")
             channel.connect()
             channel.disconnect()
         } catch (e: JSchException) {
             e.printStackTrace()
-            println("Failed")
         }
     }
 }

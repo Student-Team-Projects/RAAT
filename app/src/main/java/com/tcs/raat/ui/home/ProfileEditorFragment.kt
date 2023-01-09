@@ -53,6 +53,7 @@ import kotlinx.coroutines.launch
  * TODO: Cleanup this complex mess
  */
 class ProfileEditorFragment : DialogFragment() {
+    private lateinit var binding : FragmentProfileEditorBinding
 
     private val viewModel by activityViewModels<HomeViewModel>()
     private var profile = ServerProfile()
@@ -91,6 +92,7 @@ class ProfileEditorFragment : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val binding = FragmentProfileEditorBinding.inflate(layoutInflater, null, false)
+        val p = profile
 
         // binding.lifecycleOwner is not set for Dialog mode because we don't
         // have access to viewLifecycleOwner. We could use `this` but our layout
@@ -99,6 +101,15 @@ class ProfileEditorFragment : DialogFragment() {
         loadProfile(savedInstanceState)
         binding.profile = profile
         isCancelable = false
+
+        binding.apply {
+            keyImportBtn.setOnClickListener { keyFilePicker.launch(arrayOf("*/*")) }
+            useSshTunnel.isChecked = (p.channelType == CHANNEL_SSH_TUNNEL)
+            sshAuthTypePassword.isChecked = (p.sshAuthType == SSH_AUTH_PASSWORD)
+            sshAuthTypeKey.isChecked = (p.sshAuthType == SSH_AUTH_KEY)
+
+            isPrivateKeyEncrypted = isKeyEncrypted(p.sshPrivateKey)
+        }
 
         val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.AlertDialog_Dimmed)
                 .setTitle(getTitle())
@@ -110,11 +121,42 @@ class ProfileEditorFragment : DialogFragment() {
                 .setBackgroundInsetBottom(0)
                 .create()
 
+        fun validatePrivateKey(): Boolean {
+            if (binding.sshAuthTypeKey.isChecked) {
+                if (profile.sshPrivateKey.isEmpty()) {
+                    binding.keyImportBtn.error = "Required"
+                    return false
+                }
+
+                if (binding.isPrivateKeyEncrypted && binding.sshKeyPassword.length() == 0) {
+                    binding.sshKeyPassword.error = "Password is required for encrypted Private Key"
+                    return false
+                }
+            }
+            return true
+        }
+
+        fun validate(): Boolean {
+            var result = validateNotEmpty(binding.host) and validateNotEmpty(binding.port)
+            if (binding.useSshTunnel.isChecked) {
+                result = result and
+                        validateNotEmpty(binding.sshHost) and
+                        validateNotEmpty(binding.sshUsername) and
+                        validateNotEmpty(binding.sshPassword, binding.sshAuthTypePassword.isChecked) and
+                        validatePrivateKey()
+            }
+            return result
+        }
+
         // Customize Save button directly to avoid Dialog dismissal if validation fails
         dialog.setOnShowListener {
             dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener {
 
-                if (validateNotEmpty(binding.host) and validateNotEmpty(binding.port)) {
+                if (validate()) {
+                    profile.apply {
+                        channelType = if (binding.useSshTunnel.isChecked) CHANNEL_SSH_TUNNEL else CHANNEL_TCP
+                        sshAuthType = if (binding.sshAuthTypeKey.isChecked) SSH_AUTH_KEY else SSH_AUTH_PASSWORD
+                    }
                     saveProfile()
                     dismiss()
                 }
@@ -125,13 +167,49 @@ class ProfileEditorFragment : DialogFragment() {
     }
 
     /**************************************************************************
+     * Private Key
+     **************************************************************************/
+    private val keyFilePicker = registerForActivityResult(OpenableDocument()) { importPrivateKey(it) }
+
+    private fun importPrivateKey(uri: Uri?) {
+        if (uri == null)
+            return
+
+        lifecycleScope.launch(Dispatchers.IO) {
+
+            val text = requireContext().contentResolver.openInputStream(uri).use { it?.reader()?.readText() ?: "" }
+            val pem = runCatching { PEMDecoder.parsePEM(text.toCharArray()) }
+            val encrypted = runCatching { PEMDecoder.isPEMEncrypted(pem.getOrNull()) }.getOrNull() ?: false
+
+            lifecycleScope.launchWhenCreated {
+                if (pem.isSuccess) {
+                    profile.sshPrivateKey = text
+                    binding.keyImportBtn.setText(R.string.title_change)
+                    binding.keyImportBtn.error = null
+                    binding.isPrivateKeyEncrypted = encrypted
+                    Snackbar.make(requireView(), R.string.msg_imported, Snackbar.LENGTH_SHORT).show()
+                } else {
+                    Snackbar.make(requireView(), R.string.msg_invalid_key_file, Snackbar.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+    private fun isKeyEncrypted(key: String): Boolean {
+        return runCatching {
+            PEMDecoder.isPEMEncrypted(PEMDecoder.parsePEM(key.toCharArray()))
+        }.getOrNull() ?: false
+    }
+
+
+    /**************************************************************************
      * Advanced mode
      *
      * For the most part, we use two-way data binding to update [profile] but
      * some fields (e.g. private key) require manual UI handling.
      **************************************************************************/
 
-    private lateinit var binding: FragmentProfileEditorAdvancedBinding
+    private lateinit var bindingAdvanced: FragmentProfileEditorAdvancedBinding
 
     /**
      * Shows Profile Editor in advanced mode
@@ -152,16 +230,15 @@ class ProfileEditorFragment : DialogFragment() {
 
         loadProfile(savedInstanceState)
 
-        binding = FragmentProfileEditorAdvancedBinding.inflate(inflater, container, false)
+        bindingAdvanced = FragmentProfileEditorAdvancedBinding.inflate(inflater, container, false)
 
         val p = profile
-        binding.apply {
+        bindingAdvanced.apply {
             lifecycleOwner = viewLifecycleOwner
             profile = p
             toolbar.title = getString(getTitle())
             saveBtn.setOnClickListener { saveAdvanced() }
             toolbar.setNavigationOnClickListener { dismiss() }
-            keyImportBtn.setOnClickListener { keyFilePicker.launch(arrayOf("*/*")) }
             keyCompatModeHelpBtn.setOnClickListener {
                 MsgDialog.show(parentFragmentManager,
                                getString(R.string.title_key_compat_mode),
@@ -172,11 +249,6 @@ class ProfileEditorFragment : DialogFragment() {
             // We can't use Data Binding to initialize these because it breaks
             // the inter-dependency among views.
             useRepeater.isChecked = p.useRepeater
-            useSshTunnel.isChecked = (p.channelType == CHANNEL_SSH_TUNNEL)
-            sshAuthTypePassword.isChecked = (p.sshAuthType == SSH_AUTH_PASSWORD)
-            sshAuthTypeKey.isChecked = (p.sshAuthType == SSH_AUTH_KEY)
-
-            isPrivateKeyEncrypted = isKeyEncrypted(p.sshPrivateKey)
 
             // TODO Move it to proper place
             val securityTypes = mapOf(
@@ -217,7 +289,7 @@ class ProfileEditorFragment : DialogFragment() {
             }
         }
 
-        return binding.root
+        return bindingAdvanced.root
     }
 
     private fun saveAdvanced() {
@@ -225,10 +297,8 @@ class ProfileEditorFragment : DialogFragment() {
             return
 
         profile.apply {
-            useRepeater = binding.useRepeater.isChecked
-            idOnRepeater = binding.idOnRepeater.text.toString().toIntOrNull() ?: 0
-            channelType = if (binding.useSshTunnel.isChecked) CHANNEL_SSH_TUNNEL else CHANNEL_TCP
-            sshAuthType = if (binding.sshAuthTypeKey.isChecked) SSH_AUTH_KEY else SSH_AUTH_PASSWORD
+            useRepeater = bindingAdvanced.useRepeater.isChecked
+            idOnRepeater = bindingAdvanced.idOnRepeater.text.toString().toIntOrNull() ?: 0
         }
 
         saveProfile()
@@ -240,19 +310,9 @@ class ProfileEditorFragment : DialogFragment() {
      **************************************************************************/
 
     private fun validateAdvanced(): Boolean {
-        var result = validateNotEmpty(binding.host) and
-                validateNotEmpty(binding.port) and
-                validateNotEmpty(binding.idOnRepeater, binding.useRepeater.isChecked)
-
-        if (binding.useSshTunnel.isChecked) {
-            result = result and
-                    validateNotEmpty(binding.sshHost) and
-                    validateNotEmpty(binding.sshUsername) and
-                    validateNotEmpty(binding.sshPassword, binding.sshAuthTypePassword.isChecked) and
-                    validatePrivateKey()
-        }
-
-        return result
+        return validateNotEmpty(bindingAdvanced.host) and
+                validateNotEmpty(bindingAdvanced.port) and
+                validateNotEmpty(bindingAdvanced.idOnRepeater, bindingAdvanced.useRepeater.isChecked)
     }
 
     /**
@@ -266,53 +326,5 @@ class ProfileEditorFragment : DialogFragment() {
         return true
     }
 
-    private fun validatePrivateKey(): Boolean {
-        if (binding.sshAuthTypeKey.isChecked) {
-            if (profile.sshPrivateKey.isEmpty()) {
-                binding.keyImportBtn.error = "Required"
-                return false
-            }
 
-            if (binding.isPrivateKeyEncrypted && binding.sshKeyPassword.length() == 0) {
-                binding.sshKeyPassword.error = "Password is required for encrypted Private Key"
-                return false
-            }
-        }
-        return true
-    }
-
-    /**************************************************************************
-     * Private Key
-     **************************************************************************/
-    private val keyFilePicker = registerForActivityResult(OpenableDocument()) { importPrivateKey(it) }
-
-    private fun importPrivateKey(uri: Uri?) {
-        if (uri == null)
-            return
-
-        lifecycleScope.launch(Dispatchers.IO) {
-
-            val text = requireContext().contentResolver.openInputStream(uri).use { it?.reader()?.readText() ?: "" }
-            val pem = runCatching { PEMDecoder.parsePEM(text.toCharArray()) }
-            val encrypted = runCatching { PEMDecoder.isPEMEncrypted(pem.getOrNull()) }.getOrNull() ?: false
-
-            lifecycleScope.launchWhenCreated {
-                if (pem.isSuccess) {
-                    profile.sshPrivateKey = text
-                    binding.keyImportBtn.setText(R.string.title_change)
-                    binding.keyImportBtn.error = null
-                    binding.isPrivateKeyEncrypted = encrypted
-                    Snackbar.make(requireView(), R.string.msg_imported, Snackbar.LENGTH_SHORT).show()
-                } else {
-                    Snackbar.make(requireView(), R.string.msg_invalid_key_file, Snackbar.LENGTH_LONG).show()
-                }
-            }
-        }
-    }
-
-    private fun isKeyEncrypted(key: String): Boolean {
-        return runCatching {
-            PEMDecoder.isPEMEncrypted(PEMDecoder.parsePEM(key.toCharArray()))
-        }.getOrNull() ?: false
-    }
 }

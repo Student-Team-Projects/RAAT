@@ -22,7 +22,7 @@ import com.tcs.raat.databinding.ServerSavedBinding
 import com.tcs.raat.databinding.ServerSavedItemBinding
 import com.tcs.raat.model.ServerProfile
 import com.tcs.raat.ui.home.ServerTabs.PagerAdapter.ViewHolder
-import com.tcs.raat.util.testSSHConnection
+import com.tcs.raat.util.openVNCServer
 import com.tcs.raat.viewmodel.HomeViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
@@ -222,8 +222,8 @@ class ServerTabs(val activity: HomeActivity) {
 
         init {
             rootView.setOnClickListener {
-                testSSHConnection(profile)
-                // homeViewModel.startConnection(profile)
+                openVNCServer(profile)
+                homeViewModel.startConnection(profile)
             }
 
             rootView.setOnCreateContextMenuListener { contextMenu, view, _ ->
