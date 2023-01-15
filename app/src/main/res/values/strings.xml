@@ -7,7 +7,7 @@
   -->
 
 <resources>
-    <string name="app_name" translatable="false">AVNC</string>
+    <string name="app_name" translatable="false">RAAT</string>
 
     <string name="title_add_server_profile">Add server</string>
     <string name="title_edit_server_profile">Edit server</string>
@@ -62,7 +62,7 @@
     <string name="hint_geometry">800x500</string>
     <string name="hint_key_password">Key password</string>
 
-    <string name="msg_about_app">A fast and secure VNC client. Remotely view and control any device running a VNC server.\n\n\nAVNC is an open source and copyleft software — made with help from many contributors.</string>
+    <string name="msg_about_app">A fast and secure VNC client. Remotely view and control any device running a VNC server.\n\n\nThis is an open source and copyleft software — made with help from many contributors.</string>
     <string name="msg_server_profile_added">Server added</string>
     <string name="msg_server_profile_deleted">Server deleted</string>
     <string name="msg_zoom_reset">Zoom reset to 100%</string>

@@ -15,7 +15,7 @@
         android:layout_height="match_parent"
         android:importantForAccessibility="no"
         android:scaleType="centerCrop"
-        android:src="@drawable/ic_launcher_background" />
+        android:src="@color/ic_launcher_background" />
 
     <ImageView
         android:layout_width="160dp"
