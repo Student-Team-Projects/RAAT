@@ -58,7 +58,7 @@ data class ServerProfile(
         /**
          * Geometry for the VNC server (e.g. 800x600)
          */
-        var geometry: String = "800x500",
+        var geometry: String = "800x600",
 
         /**
          * Security type to use when connecting to this server (e.g. VncAuth).
