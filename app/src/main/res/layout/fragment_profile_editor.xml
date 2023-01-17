@@ -101,13 +101,14 @@
 
             <!-- SSH options -->
 
-            <CheckBox
-                android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/ssh_config_label"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/use_ssh_tunnel"
-                style="@style/FormField.CheckBox"
-                android:text="@string/title_use_ssh_tunnel" />
-
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="16dp"
+                android:textSize="16sp"
+                android:text="@string/ssh_config_label" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -135,7 +136,7 @@
                     android:text='@={"" + profile.sshPort}' />
             </LinearLayout>
 
-                <!--Username-->
+            <!--Username-->
             <EditText
                 android:id="@+id/ssh_username"
                 android:layout_width="match_parent"
@@ -206,6 +207,13 @@
                 android:inputType="textPassword"
                 android:text="@={profile.sshPrivateKeyPassword}"
                 app:isVisible="@{sshAuthTypeKey.checked &amp;&amp; isPrivateKeyEncrypted}" />
+
+            <CheckBox
+                android:id="@+id/use_ssh_tunnel"
+                style="@style/FormField.CheckBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title_use_ssh_tunnel" />
         </LinearLayout>
     </ScrollView>
 </layout>

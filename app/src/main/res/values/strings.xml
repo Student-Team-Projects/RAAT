@@ -59,7 +59,7 @@
     <string name="hint_server_id">Server ID</string>
     <string name="hint_username">Username</string>
     <string name="hint_password">Password</string>
-    <string name="hint_geometry">800x500</string>
+    <string name="hint_geometry">800x600</string>
     <string name="hint_key_password">Key password</string>
 
     <string name="msg_about_app">A fast and secure VNC client. Remotely view and control any device running a VNC server.\n\n\nThis is an open source and copyleft software — made with help from many contributors.</string>
@@ -196,4 +196,5 @@
     <string name="pref_keycode_map">Keycode map</string>
     <string name="pref_touch_test">Touch test</string>
     <string name="pref_key_test">Key test</string>
+    <string name="ssh_config_label">SSH Configuration</string>
 </resources>

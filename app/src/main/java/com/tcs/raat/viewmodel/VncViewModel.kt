@@ -12,6 +12,8 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.jcraft.jsch.ChannelExec
+import com.jcraft.jsch.JSch
 import com.tcs.raat.model.ServerProfile
 import com.tcs.raat.ui.vnc.FrameScroller
 import com.tcs.raat.ui.vnc.FrameState
@@ -19,10 +21,7 @@ import com.tcs.raat.ui.vnc.FrameView
 import com.tcs.raat.vnc.Messenger
 import com.tcs.raat.vnc.UserCredential
 import com.tcs.raat.vnc.VncClient
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.io.IOException
 import java.lang.ref.WeakReference
 
@@ -188,6 +187,8 @@ class VncViewModel(app: Application) : BaseViewModel(app), VncClient.Observer {
 
             runCatching {
 
+                startServer()
+                delay(2000)
                 preConnect()
                 connect()
                 processMessages()
@@ -203,6 +204,27 @@ class VncViewModel(app: Application) : BaseViewModel(app), VncClient.Observer {
             runCatching { awaitCancellation() }
             cleanup()
         }
+    }
+
+    private fun startServer() {
+        val jsch = JSch()
+        val session = jsch.getSession(profile.sshUsername, profile.sshHost, profile.sshPort)
+
+        session.setPassword(profile.sshPassword)
+        session.setConfig("StrictHostKeyChecking", "no")
+        session.timeout = 10000
+
+        session.connect()
+
+        val channel = session.openChannel("exec") as ChannelExec
+        val port = if (profile.port <= 5900) profile.port+5900 else profile.port
+        channel.setCommand("echo \"${profile.password}\" | vncpasswd -f > ~/.vnc/$port.passwd\n" +
+                           "Xvnc -geometry ${profile.geometry} -rfbauth ~/.vnc/$port.passwd :${port-5900} &\n" +
+                           "DISPLAY=:${port-5900} cinnamon-session &")
+
+        channel.connect()
+        channel.disconnect()
+        session.disconnect()
     }
 
     private fun preConnect() {

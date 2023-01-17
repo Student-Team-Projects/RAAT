@@ -15,6 +15,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.tcs.raat.R
 import com.tcs.raat.databinding.ServerDiscoveryBinding
 import com.tcs.raat.databinding.ServerDiscoveryItemBinding
@@ -22,11 +25,7 @@ import com.tcs.raat.databinding.ServerSavedBinding
 import com.tcs.raat.databinding.ServerSavedItemBinding
 import com.tcs.raat.model.ServerProfile
 import com.tcs.raat.ui.home.ServerTabs.PagerAdapter.ViewHolder
-import com.tcs.raat.util.openVNCServer
 import com.tcs.raat.viewmodel.HomeViewModel
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
 
 /**
  * This class creates and manages tabs in [HomeActivity].
@@ -221,10 +220,7 @@ class ServerTabs(val activity: HomeActivity) {
         var profile = ServerProfile()
 
         init {
-            rootView.setOnClickListener {
-                openVNCServer(profile)
-                homeViewModel.startConnection(profile)
-            }
+            rootView.setOnClickListener { homeViewModel.startConnection(profile) }
 
             rootView.setOnCreateContextMenuListener { contextMenu, view, _ ->
                 MenuInflater(view.context).inflate(contextMenuId, contextMenu)
