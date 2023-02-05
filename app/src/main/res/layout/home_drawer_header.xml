@@ -23,5 +23,5 @@
         android:layout_height="80dp"
         android:layout_gravity="center_horizontal|bottom"
         android:importantForAccessibility="no"
-        android:src="@drawable/ic_wordmark" />
+        android:src="@drawable/logo_2" />
 </FrameLayout>
