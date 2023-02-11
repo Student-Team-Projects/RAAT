@@ -44,7 +44,7 @@ data class ServerProfile(
         /**
          * Port number of the server.
          */
-        var port: Int = 5900,
+        var port: Int = 5901,
 
         /**
          * Username used for authentication.

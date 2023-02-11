@@ -195,7 +195,7 @@ class VncViewModel(app: Application) : BaseViewModel(app), VncClient.Observer {
                 processMessages()
 
             }.onFailure {
-                if (it is IOException) disconnectReason.postValue(it.message)
+                disconnectReason.postValue(it.message)
                 Log.e("ReceiverCoroutine", "Connection failed", it)
             }
 

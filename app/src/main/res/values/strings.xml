@@ -47,7 +47,7 @@
     <string name="title_license">Licence</string>
     <string name="title_open_source_libraries">Open source libraries</string>
     <string name="title_report_bug">Report an issue</string>
-    <string name="title_github_repo">Source code</string>
+    <string name="title_github_repo">AVNC source code</string>
     <string name="title_unlock_dialog">Unlock to continue</string>
     <string name="title_automatic">Automatic</string>
     <string name="title_none">None</string>
@@ -64,7 +64,7 @@
     <string name="hint_geometry">800x600</string>
     <string name="hint_key_password">Key password</string>
 
-    <string name="msg_about_app">A fast and secure VNC client. Remotely view and control any device running a VNC server.\n\n\nThis is an open source and copyleft software — made with help from many contributors.</string>
+    <string name="msg_about_app">A fast and secure VNC client. Remotely view and control an arch linux device with raat-server installed.\n\n\nThis is a slightly modified version of AVNC, an open source android VNC client (see link below).</string>
     <string name="msg_server_profile_added">Server added</string>
     <string name="msg_server_profile_deleted">Server deleted</string>
     <string name="msg_zoom_reset">Zoom reset to 100%</string>
