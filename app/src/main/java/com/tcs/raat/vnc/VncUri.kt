@@ -52,7 +52,7 @@ class VncUri(private val uri: Uri) {
     val saveConnection = uri.getBooleanQueryParameter("SaveConnection", false)
     val sshHost = uri.getQueryParameter("SshHost") ?: host
     val sshPort = uri.getQueryParameter("SshPort")?.toIntOrNull() ?: 22
-    val sshUsername = uri.getQueryParameter("SshUsername") ?: ""
+    val sshUsername = uri.getQueryParameter("SshUsername") ?: username
     val sshPassword = uri.getQueryParameter("SshPassword") ?: ""
 
     /**

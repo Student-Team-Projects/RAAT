@@ -219,9 +219,7 @@ class VncViewModel(app: Application) : BaseViewModel(app), VncClient.Observer {
 
         val channel = session.openChannel("exec") as ChannelExec
         val port = if (profile.port <= 5900) profile.port+5900 else profile.port
-        channel.setCommand("echo \"${profile.password}\" | vncpasswd -f > ~/.vnc/$port.passwd\n" +
-                           "Xvnc -geometry ${profile.geometry} -rfbauth ~/.vnc/$port.passwd :${port-5900} &\n" +
-                           "DISPLAY=:${port-5900} cinnamon-session &")
+        channel.setCommand("raat-server ${profile.password} $port ${profile.geometry}")
 
         channel.connect()
         channel.disconnect()

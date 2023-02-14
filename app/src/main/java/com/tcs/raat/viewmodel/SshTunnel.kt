@@ -128,7 +128,8 @@ class SshTunnel(private val viewModel: VncViewModel) {
      * If connection failed due to [NoRouteToHostException], we try the next address (if available).
      */
     private fun connect(profile: ServerProfile): Connection {
-        for (address in InetAddress.getAllByName(profile.sshHost)) {
+        val sshHost = profile.sshHost.ifEmpty { profile.host }
+        for (address in InetAddress.getAllByName(sshHost)) {
             try {
                 return Connection(address.hostAddress, profile.sshPort).apply { connect(HostKeyVerifier(viewModel)) }
             } catch (e: IOException) {
@@ -137,7 +138,7 @@ class SshTunnel(private val viewModel: VncViewModel) {
             }
         }
         // We will reach here only if every address throws NoRouteToHostException
-        throw NoRouteToHostException("Unreachable SSH host: ${profile.sshHost}")
+        throw NoRouteToHostException("Unreachable SSH host: $sshHost")
     }
 
     /**
