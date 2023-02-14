@@ -18,6 +18,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.SimpleAdapter
+import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
@@ -34,7 +35,6 @@ import com.tcs.raat.util.MsgDialog
 import com.tcs.raat.util.OpenableDocument
 import com.tcs.raat.viewmodel.HomeViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.trilead.ssh2.crypto.PEMDecoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -92,8 +92,7 @@ class ProfileEditorFragment : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val binding = FragmentProfileEditorBinding.inflate(layoutInflater, null, false)
-        val p = profile
+        binding = FragmentProfileEditorBinding.inflate(layoutInflater, null, false)
 
         // binding.lifecycleOwner is not set for Dialog mode because we don't
         // have access to viewLifecycleOwner. We could use `this` but our layout
@@ -105,11 +104,11 @@ class ProfileEditorFragment : DialogFragment() {
 
         binding.apply {
             keyImportBtn.setOnClickListener { keyFilePicker.launch(arrayOf("*/*")) }
-            useSshTunnel.isChecked = (p.channelType == CHANNEL_SSH_TUNNEL)
-            sshAuthTypePassword.isChecked = (p.sshAuthType == SSH_AUTH_PASSWORD)
-            sshAuthTypeKey.isChecked = (p.sshAuthType == SSH_AUTH_KEY)
+            useSshTunnel.isChecked = (profile?.channelType == CHANNEL_SSH_TUNNEL)
+            sshAuthTypePassword.isChecked = (profile?.sshAuthType == SSH_AUTH_PASSWORD)
+            sshAuthTypeKey.isChecked = (profile?.sshAuthType == SSH_AUTH_KEY)
 
-            isPrivateKeyEncrypted = isKeyEncrypted(p.sshPrivateKey)
+            isPrivateKeyEncrypted = isKeyEncrypted(profile?.sshPrivateKey)
         }
 
         val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.AlertDialog_Dimmed)
@@ -141,8 +140,6 @@ class ProfileEditorFragment : DialogFragment() {
             var result = validateNotEmpty(binding.host) and validateNotEmpty(binding.port)
             if (binding.useSshTunnel.isChecked) {
                 result = result and
-                        validateNotEmpty(binding.sshHost) and
-                        validateNotEmpty(binding.sshUsername) and
                         validateNotEmpty(binding.sshPassword, binding.sshAuthTypePassword.isChecked) and
                         validatePrivateKey()
             }
@@ -188,18 +185,21 @@ class ProfileEditorFragment : DialogFragment() {
                     binding.keyImportBtn.setText(R.string.title_change)
                     binding.keyImportBtn.error = null
                     binding.isPrivateKeyEncrypted = encrypted
-                    Snackbar.make(requireView(), R.string.msg_imported, Snackbar.LENGTH_SHORT).show()
+                    Toast.makeText(activity?.applicationContext, R.string.msg_imported, Toast.LENGTH_SHORT).show()
                 } else {
-                    Snackbar.make(requireView(), R.string.msg_invalid_key_file, Snackbar.LENGTH_LONG).show()
+                    Toast.makeText(activity?.applicationContext, R.string.msg_invalid_key_file, Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
-    private fun isKeyEncrypted(key: String): Boolean {
-        return runCatching {
-            PEMDecoder.isPEMEncrypted(PEMDecoder.parsePEM(key.toCharArray()))
-        }.getOrNull() ?: false
+    private fun isKeyEncrypted(key: String?): Boolean {
+        if (key != null) {
+            return runCatching {
+                PEMDecoder.isPEMEncrypted(PEMDecoder.parsePEM(key.toCharArray()))
+            }.getOrNull() == true
+        }
+        return false
     }
 
 
