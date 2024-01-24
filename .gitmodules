@@ -1,9 +1,9 @@
 [submodule "extern/libvncserver"]
 	path = extern/libvncserver
-	url = git@github.com:gujjwal00/libvncserver.git
+	url = https://github.com/gujjwal00/libvncserver.git
 [submodule "extern/libjpeg-turbo"]
 	path = extern/libjpeg-turbo
-	url = git@github.com:libjpeg-turbo/libjpeg-turbo
+	url = https://github.com/libjpeg-turbo/libjpeg-turbo
 [submodule "extern/wolfssl"]
 	path = extern/wolfssl
-	url = git@github.com:wolfSSL/wolfssl.git
+	url = https://github.com/wolfSSL/wolfssl.git
