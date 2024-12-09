@@ -262,6 +262,17 @@ class ProfileEditorFragment : DialogFragment() {
 
             security.setEntries(securityTypes, p.securityType) { p.securityType = it }
 
+
+            val desktopEnvOptions = mapOf(
+                "Lxde" to "Lxde",
+                "Xfce" to "Xfce"
+            )
+
+            desktopEnv.setStringEntries(desktopEnvOptions, p.desktopEnv) { selectedEnv ->
+                p.desktopEnv = selectedEnv
+            }
+
+
             //Setup Gesture Style
             val gestureStyleItems = listOf(
                     mapOf("name" to getString(R.string.pref_gesture_style_auto),

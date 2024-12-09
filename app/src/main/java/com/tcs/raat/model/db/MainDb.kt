@@ -16,7 +16,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.tcs.raat.model.ServerProfile
 
-@Database(entities = [ServerProfile::class], version = 2, exportSchema = true)
+@Database(entities = [ServerProfile::class], version = 3, exportSchema = true)
 abstract class MainDb : RoomDatabase() {
     abstract val serverProfileDao: ServerProfileDao
 
@@ -34,7 +34,7 @@ abstract class MainDb : RoomDatabase() {
         fun getInstance(context: Context): MainDb {
             if (instance == null) {
                 instance = Room.databaseBuilder(context, MainDb::class.java, "main")
-                        .addMigrations(Migration_1_2)
+                        .addMigrations(Migration_1_2, Migration_2_3)
                         .build()
             }
             return instance!!
@@ -48,6 +48,13 @@ abstract class MainDb : RoomDatabase() {
                 db.execSQL("ALTER TABLE profiles ADD COLUMN zoom2 REAL NOT NULL DEFAULT 1.0")
                 db.execSQL("ALTER TABLE profiles ADD COLUMN gestureStyle TEXT NOT NULL DEFAULT 'auto'")
                 db.execSQL("UPDATE profiles SET imageQuality = 5")
+            }
+        }
+
+        // Added in v3.0.0
+        private val Migration_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE profiles ADD COLUMN desktopEnv TEXT NOT NULL DEFAULT 'Lxde'")
             }
         }
     }
