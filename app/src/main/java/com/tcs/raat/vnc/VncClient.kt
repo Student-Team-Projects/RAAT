@@ -1,6 +1,5 @@
 package com.tcs.raat.vnc
 
-import android.util.Log
 import androidx.annotation.Keep
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -119,7 +118,6 @@ class VncClient(private val observer: Observer) {
      */
     fun connect(host: String, port: Int) {
         connected = nativeInit(nativePtr, host, port)
-        Log.d("connect", nativeGetLastErrorStr());
         if (!connected) throw IOException(nativeGetLastErrorStr())
     }
 
@@ -129,12 +127,10 @@ class VncClient(private val observer: Observer) {
      * @param uSecTimeout Timeout in microseconds.
      */
     fun processServerMessage(uSecTimeout: Int = 1000000) {
-        Log.d("processServerMessage", connected.toString());
         if (!connected)
             return
 
         if (!nativeProcessServerMessage(nativePtr, uSecTimeout)) {
-            Log.d("processServerMessage", "wrong");
             connected = false
             throw IOException(nativeGetLastErrorStr())
         }
