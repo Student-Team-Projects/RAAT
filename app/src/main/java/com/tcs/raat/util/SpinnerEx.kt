@@ -81,4 +81,8 @@ class SpinnerEx(context: Context, attrs: AttributeSet? = null) : AppCompatSpinne
     fun setEntries(entries: Map<String, Int>, initialValue: Int, selectionListener: (Int) -> Unit) {
         setEntries(entries.keys.toTypedArray(), entries.values.toTypedArray(), initialValue, selectionListener)
     }
+
+    fun setStringEntries(entries: Map<String, String>, initialValue: String, selectionListener: (String) -> Unit) {
+        setEntries(entries.keys.toTypedArray(), entries.values.toTypedArray(), initialValue, selectionListener)
+    }
 }

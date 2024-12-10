@@ -207,7 +207,7 @@ class VncViewModel(app: Application) : BaseViewModel(app), VncClient.Observer {
         }
     }
 
-    private fun startServer() {
+    private suspend fun startServer() {
         val jsch = JSch()
         val session = jsch.getSession(profile.sshUsername, profile.sshHost, profile.sshPort)
 
@@ -219,11 +219,15 @@ class VncViewModel(app: Application) : BaseViewModel(app), VncClient.Observer {
 
         val channel = session.openChannel("exec") as ChannelExec
         val port = if (profile.port <= 5900) profile.port+5900 else profile.port
-        channel.setCommand("raat-server ${profile.password} $port ${profile.geometry}")
+        Log.d("Start Raat Server", "raat-server ${profile.password} $port ${profile.geometry} ${profile.desktopEnv}")
+
+        channel.setCommand("raat-server ${profile.password} $port ${profile.geometry} ${profile.desktopEnv}")
 
         channel.connect()
+        delay(7000)
         channel.disconnect()
         session.disconnect()
+
     }
 
     private fun preConnect() {

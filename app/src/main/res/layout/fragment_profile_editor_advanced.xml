@@ -209,6 +209,28 @@
                         app:layout_constraintStart_toEndOf="@id/image_quality"
                         app:layout_constraintTop_toTopOf="@id/image_quality" />
 
+                    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+                    <!-- Desktop Environment                                                   -->
+                    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+                    <TextView
+                        android:id="@+id/desktop_env_label"
+                        style="@style/FormField.LabelWithIcon"
+                        android:text="@string/title_desktop_environment"
+                        app:drawableStartCompat="@drawable/ic_desktop"
+                        app:layout_constraintBottom_toBottomOf="@id/desktop_env"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/desktop_env" />
+
+                    <com.tcs.raat.util.SpinnerEx
+                        android:id="@+id/desktop_env"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:minHeight="@dimen/action_btn_size"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@id/image_quality"
+                        app:layout_constraintTop_toBottomOf="@id/image_quality"
+                        tools:entries="@array/dummy_array" />
 
                     <!--Gesture style-->
                     <TextView
@@ -227,8 +249,8 @@
                         android:layout_height="wrap_content"
                         android:minHeight="@dimen/action_btn_size"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="@id/image_quality"
-                        app:layout_constraintTop_toBottomOf="@id/image_quality"
+                        app:layout_constraintStart_toStartOf="@id/desktop_env"
+                        app:layout_constraintTop_toBottomOf="@id/desktop_env"
                         tools:entries="@array/dummy_array" />
 
 

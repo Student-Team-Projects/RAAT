@@ -34,6 +34,9 @@
     <string name="title_image_quality">Image quality</string>
     <string name="title_image_quality_raw">Raw</string>
     <string name="title_vnc_security">Security</string>
+
+    <string name="title_desktop_environment">Desktop env</string>
+
     <string name="title_use_ssh_tunnel">Use SSH tunnel</string>
     <string name="title_unknown_ssh_host">Unknown SSH host</string>
     <string name="title_ssh_host_key_changed">SSH host key changed</string>
