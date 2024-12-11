@@ -10,6 +10,7 @@
 
 package com.tcs.raat.ui.home
 
+import android.util.Log
 import android.view.*
 import androidx.core.view.forEach
 import androidx.recyclerview.widget.DiffUtil
@@ -20,6 +21,8 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import com.jcraft.jsch.ChannelExec
+import com.jcraft.jsch.JSch
 import com.tcs.raat.R
 import com.tcs.raat.databinding.ServerDiscoveryBinding
 import com.tcs.raat.databinding.ServerDiscoveryItemBinding
@@ -28,6 +31,9 @@ import com.tcs.raat.databinding.ServerSavedItemBinding
 import com.tcs.raat.model.ServerProfile
 import com.tcs.raat.ui.home.ServerTabs.PagerAdapter.ViewHolder
 import com.tcs.raat.viewmodel.HomeViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * This class creates and manages tabs in [HomeActivity].
@@ -106,6 +112,10 @@ class ServerTabs(val activity: HomeActivity) {
     }
 
 
+    fun getSessionStatus(profile: ServerProfile) {
+        
+    }
+
     /**********************************************************************************************
      * Saved servers
      **********************************************************************************************/
@@ -120,7 +130,12 @@ class ServerTabs(val activity: HomeActivity) {
         binding.serversRv.adapter = adapter
         binding.serversRv.setHasFixedSize(true)
 
-        activity.viewModel.serverProfiles.observe(activity) { adapter.submitList(it) }
+        activity.viewModel.serverProfiles.observe(activity) { profiles ->
+            profiles.forEach { profile ->
+                Log.d("SavedServers2", "Profile added: $profile")
+            }
+            adapter.submitList(profiles)
+        }
         return binding.root
     }
 
@@ -168,7 +183,12 @@ class ServerTabs(val activity: HomeActivity) {
         binding.discoveredRv.adapter = adapter
         binding.discoveredRv.setHasFixedSize(true)
 
-        activity.viewModel.discovery.servers.observe(activity) { adapter.submitList(it) }
+        activity.viewModel.serverProfiles.observe(activity) { profiles ->
+            profiles.forEach { profile ->
+                Log.d("SavedServers1", "Profile added: $profile")
+            }
+            adapter.submitList(profiles)
+        }
 
         return binding.root
     }
@@ -236,6 +256,7 @@ class ServerTabs(val activity: HomeActivity) {
             when (item.itemId) {
                 R.id.edit -> homeViewModel.onEditProfile(profile)
                 R.id.duplicate -> homeViewModel.onDuplicateProfile(profile)
+                R.id.close_session -> homeViewModel.onCloseSessionProfile(profile)
                 R.id.delete -> homeViewModel.deleteProfile(profile)
                 R.id.copy_host -> copyToClipboard(profile.host)
                 R.id.copy_name -> copyToClipboard(profile.name)

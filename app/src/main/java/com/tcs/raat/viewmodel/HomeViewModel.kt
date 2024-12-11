@@ -9,12 +9,19 @@
 package com.tcs.raat.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.viewModelScope
+import com.jcraft.jsch.ChannelExec
+import com.jcraft.jsch.JSch
 import com.tcs.raat.model.ServerProfile
 import com.tcs.raat.vnc.Discovery
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class HomeViewModel(app: Application) : BaseViewModel(app) {
 
@@ -110,6 +117,34 @@ class HomeViewModel(app: Application) : BaseViewModel(app) {
         val duplicate = profile.copy(ID = 0)
         duplicate.name += " (Copy)"
         editProfileEvent.fire(duplicate)
+    }
+
+    fun onCloseSessionProfile(profile: ServerProfile) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val jsch = JSch()
+                Log.d("Close session raat", "${profile.sshUsername} ${profile.sshHost}, ${profile.sshPort}")
+                val session = jsch.getSession(profile.sshUsername, profile.sshHost, profile.sshPort)
+
+                session.setPassword(profile.sshPassword)
+                session.setConfig("StrictHostKeyChecking", "no")
+                session.timeout = 10000
+
+                session.connect()
+
+                val channel = session.openChannel("exec") as ChannelExec
+                val port = if (profile.port <= 5900) profile.port + 5900 else profile.port
+                Log.d("Close session raat", "raat-close-session $port")
+
+                channel.setCommand("raat-close-session $port")
+
+                channel.connect()
+                channel.disconnect()
+                session.disconnect()
+            } catch (e: Exception) {
+                Log.e("Close session error", "Error closing session", e)
+            }
+        }
     }
 
     /**************************************************************************

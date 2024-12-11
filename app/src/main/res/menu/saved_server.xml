@@ -17,6 +17,9 @@
         android:id="@+id/copy_host"
         android:title="@string/title_copy_host" />
     <item
+        android:id="@+id/close_session"
+        android:title="@string/title_close_session" />
+    <item
         android:id="@+id/delete"
         android:title="@string/title_delete" />
 </menu>

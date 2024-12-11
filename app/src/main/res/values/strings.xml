@@ -14,6 +14,7 @@
     <string name="title_add_server_profile">Add server</string>
     <string name="title_edit_server_profile">Edit server</string>
     <string name="title_duplicate">Duplicate</string>
+    <string name="title_close_session">Close session</string>
     <string name="title_edit">Edit</string>
     <string name="title_delete">Delete</string>
     <string name="title_clear">Clear</string>
