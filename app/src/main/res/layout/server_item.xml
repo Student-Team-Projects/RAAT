@@ -38,6 +38,21 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Example Server Name" />
 
+        <!-- Status Text -->
+        <TextView
+            android:id="@+id/server_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_small"
+            android:layout_marginTop="2dp"
+            android:text="@{profile.isSessionAlive ? @string/alive : @string/dead}"
+            android:textColor="@{profile.isSessionAlive ? @color/green : @color/red}"
+            android:textSize="12sp"
+            app:layout_constraintStart_toEndOf="@id/name"
+            app:layout_constraintTop_toTopOf="@id/name"
+            tools:text="Alive"
+            tools:textColor="@color/green" />
+
         <TextView
             android:id="@+id/address"
             android:layout_width="wrap_content"

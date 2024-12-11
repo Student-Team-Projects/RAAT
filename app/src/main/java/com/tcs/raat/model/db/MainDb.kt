@@ -16,7 +16,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.tcs.raat.model.ServerProfile
 
-@Database(entities = [ServerProfile::class], version = 3, exportSchema = true)
+@Database(entities = [ServerProfile::class], version = 4, exportSchema = true)
 abstract class MainDb : RoomDatabase() {
     abstract val serverProfileDao: ServerProfileDao
 
@@ -34,7 +34,7 @@ abstract class MainDb : RoomDatabase() {
         fun getInstance(context: Context): MainDb {
             if (instance == null) {
                 instance = Room.databaseBuilder(context, MainDb::class.java, "main")
-                        .addMigrations(Migration_1_2, Migration_2_3)
+                        .addMigrations(Migration_1_2, Migration_2_3, Migration_3_4)
                         .build()
             }
             return instance!!
@@ -55,6 +55,13 @@ abstract class MainDb : RoomDatabase() {
         private val Migration_2_3 = object : Migration(2, 3) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE profiles ADD COLUMN desktopEnv TEXT NOT NULL DEFAULT 'Lxde'")
+            }
+        }
+
+        // Added in v3.0.0
+        private val Migration_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE profiles ADD COLUMN isSessionAlive INTEGER NOT NULL DEFAULT 0")
             }
         }
     }

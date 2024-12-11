@@ -213,20 +213,21 @@ class VncViewModel(app: Application) : BaseViewModel(app), VncClient.Observer {
 
         session.setPassword(profile.sshPassword)
         session.setConfig("StrictHostKeyChecking", "no")
-        session.timeout = 10000
+        session.timeout = 12000
 
         session.connect()
 
         val channel = session.openChannel("exec") as ChannelExec
         val port = if (profile.port <= 5900) profile.port+5900 else profile.port
-        Log.d("Start Raat Server", "raat-server ${profile.password} $port ${profile.geometry} ${profile.desktopEnv}")
+        Log.d("Start Raat Server", "raat-server-request open-session --vnc_password=${profile.password} --rfb_port=$port --geometry=${profile.geometry} --de_choice=${profile.desktopEnv}")
 
-        channel.setCommand("raat-server ${profile.password} $port ${profile.geometry} ${profile.desktopEnv}")
+        channel.setCommand("raat-server-request open-session --vnc_password=${profile.password} --rfb_port=$port --geometry=${profile.geometry} --de_choice=${profile.desktopEnv}")
 
         channel.connect()
         delay(7000)
         channel.disconnect()
         session.disconnect()
+        profile.isSessionAlive = true;
 
     }
 
