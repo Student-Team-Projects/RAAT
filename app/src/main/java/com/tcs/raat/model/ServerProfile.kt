@@ -156,7 +156,8 @@ data class ServerProfile(
         var sshAuthType: Int = SSH_AUTH_KEY,
         var sshPassword: String = "",
         var sshPrivateKey: String = "",
-        var sshPrivateKeyPassword: String = ""
+        var sshPrivateKeyPassword: String = "",
+        var isSessionAlive: Boolean = false,
 
 ) : Parcelable {
 

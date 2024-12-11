@@ -34,6 +34,8 @@ import com.tcs.raat.viewmodel.HomeViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 /**
  * This class creates and manages tabs in [HomeActivity].
@@ -112,8 +114,54 @@ class ServerTabs(val activity: HomeActivity) {
     }
 
 
-    fun getSessionStatus(profile: ServerProfile) {
-        
+    fun getSessionStatus(profile: ServerProfile): Boolean {
+        profile.isSessionAlive = false
+        runBlocking {
+            withContext(Dispatchers.IO) {
+                try {
+                    val jsch = JSch()
+                    val session = jsch.getSession(profile.sshUsername, profile.sshHost, profile.sshPort)
+
+                    session.setPassword(profile.sshPassword)
+                    session.setConfig("StrictHostKeyChecking", "no")
+                    session.timeout = 10000
+
+                    session.connect()
+
+                    val channel = session.openChannel("exec") as ChannelExec
+                    val port = if (profile.port <= 5900) profile.port + 5900 else profile.port
+
+                    // For getting status:
+                    channel.setCommand("raat-server-request get-session-status --rfb_port=$port")
+
+                    // Capture the output
+                    val inputStream = channel.inputStream
+                    channel.connect()
+
+                    // Read server response
+                    val output = inputStream.bufferedReader().readText()
+                    if (output.contains("Session alive.")) {
+                        profile.isSessionAlive = true
+                        Log.d("getSessionStatus", "Alive")
+
+                    }
+                    Log.d(
+                        "getSessionStatus",
+                        "Server response: $output for ${profile.sshUsername} ${profile.sshHost}, ${profile.sshPort}"
+                    )
+
+                    channel.disconnect()
+                    session.disconnect()
+                } catch (e: Exception) {
+                    Log.e(
+                        "Get session status err",
+                        "Error getting session status for ${profile.sshUsername} ${profile.sshHost}, ${profile.sshPort}",
+                        e
+                    )
+                }
+            }
+        }
+        return  profile.isSessionAlive
     }
 
     /**********************************************************************************************
@@ -133,6 +181,8 @@ class ServerTabs(val activity: HomeActivity) {
         activity.viewModel.serverProfiles.observe(activity) { profiles ->
             profiles.forEach { profile ->
                 Log.d("SavedServers2", "Profile added: $profile")
+                getSessionStatus(profile)
+                Log.d("SavedServers23", "${profile.isSessionAlive}")
             }
             adapter.submitList(profiles)
         }
@@ -166,6 +216,11 @@ class ServerTabs(val activity: HomeActivity) {
             override fun areItemsTheSame(old: ServerProfile, new: ServerProfile) = (old.ID == new.ID)
             override fun areContentsTheSame(old: ServerProfile, new: ServerProfile) = (old == new)
         }
+
+        // Add this method to refresh the data
+        fun updateData(newProfiles: List<ServerProfile>) {
+            submitList(newProfiles)
+        }
     }
 
 
@@ -185,7 +240,7 @@ class ServerTabs(val activity: HomeActivity) {
 
         activity.viewModel.serverProfiles.observe(activity) { profiles ->
             profiles.forEach { profile ->
-                Log.d("SavedServers1", "Profile added: $profile")
+                profile.isSessionAlive = getSessionStatus(profile)
             }
             adapter.submitList(profiles)
         }

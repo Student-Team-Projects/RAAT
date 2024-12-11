@@ -134,13 +134,16 @@ class HomeViewModel(app: Application) : BaseViewModel(app) {
 
                 val channel = session.openChannel("exec") as ChannelExec
                 val port = if (profile.port <= 5900) profile.port + 5900 else profile.port
-                Log.d("Close session raat", "raat-close-session $port")
+                Log.d("Close session raat", "raat-server-request kill-session --rfb_port=$port")
 
-                channel.setCommand("raat-close-session $port")
+                channel.setCommand("raat-server-request kill-session --rfb_port=$port")
 
                 channel.connect()
                 channel.disconnect()
                 session.disconnect()
+
+                profile.isSessionAlive = false
+                onEditProfile(profile);
             } catch (e: Exception) {
                 Log.e("Close session error", "Error closing session", e)
             }

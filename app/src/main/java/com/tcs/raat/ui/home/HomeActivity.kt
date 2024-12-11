@@ -128,6 +128,10 @@ class HomeActivity : AppCompatActivity() {
             Snackbar.make(binding.root, R.string.msg_server_profile_added, Snackbar.LENGTH_SHORT).show()
     }
 
+    private fun onProfileChangedStatus(profile: ServerProfile) {
+        tabs.showSavedServers()
+    }
+
     /**
      * Shows delete confirmation snackbar.
      */
