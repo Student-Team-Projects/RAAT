@@ -1,4 +1,8 @@
 /*
+ * Copyright (c) 2025  Viktar Dubovik.
+ * Copyright (c) 2025  Bogdan Tolstik.
+ * Copyright (c) 2025  Daniil Zabauski.
+ * Copyright (c) 2025  Dzmitry Maslionchanka.
  * Copyright (c) 2023  Hubert Zięba.
  * Copyright (c) 2023  Justyna Jaworska.
  * Copyright (c) 2021  Gaurav Ujjwal.
@@ -36,6 +40,61 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+
+fun getSessionStatus(profile: ServerProfile): Boolean {
+    profile.isSessionAlive = false
+    runBlocking {
+        withContext(Dispatchers.IO) {
+            try {
+                val jsch = JSch()
+                val session = jsch.getSession(profile.sshUsername, profile.sshHost, profile.sshPort)
+
+                session.setPassword(profile.sshPassword)
+                session.setConfig("StrictHostKeyChecking", "no")
+                session.timeout = 10000
+
+                session.connect()
+
+                val channel = session.openChannel("exec") as ChannelExec
+                val port = if (profile.port <= 5900) profile.port + 5900 else profile.port
+
+                // For getting status:
+                channel.setCommand("raat-server-request get-session-status --rfb_port=$port")
+
+                // Capture the output
+                val inputStream = channel.inputStream
+                channel.connect()
+
+                // Read server response
+                val output = inputStream.bufferedReader().readText()
+                if (output.contains("Session alive.")) {
+                    profile.isSessionAlive = true
+                    Log.d("getSessionStatus", "Alive")
+
+                } else {
+                    profile.isSessionAlive = false
+                    Log.d("getSessionStatus", "Dead")
+                }
+                Log.d(
+                    "getSessionStatus",
+                    "Server response: $output for ${profile.sshUsername} ${profile.sshHost}, ${profile.sshPort}"
+                )
+
+                channel.disconnect()
+                session.disconnect()
+            } catch (e: Exception) {
+                Log.e(
+                    "Get session status err",
+                    "Error getting session status for ${profile.sshUsername} ${profile.sshHost}, ${profile.sshPort}",
+                    e
+                )
+            }
+        }
+    }
+    return  profile.isSessionAlive
+}
+
+
 
 /**
  * This class creates and manages tabs in [HomeActivity].
@@ -113,56 +172,6 @@ class ServerTabs(val activity: HomeActivity) {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {}
     }
 
-
-    fun getSessionStatus(profile: ServerProfile): Boolean {
-        profile.isSessionAlive = false
-        runBlocking {
-            withContext(Dispatchers.IO) {
-                try {
-                    val jsch = JSch()
-                    val session = jsch.getSession(profile.sshUsername, profile.sshHost, profile.sshPort)
-
-                    session.setPassword(profile.sshPassword)
-                    session.setConfig("StrictHostKeyChecking", "no")
-                    session.timeout = 10000
-
-                    session.connect()
-
-                    val channel = session.openChannel("exec") as ChannelExec
-                    val port = if (profile.port <= 5900) profile.port + 5900 else profile.port
-
-                    // For getting status:
-                    channel.setCommand("raat-server-request get-session-status --rfb_port=$port")
-
-                    // Capture the output
-                    val inputStream = channel.inputStream
-                    channel.connect()
-
-                    // Read server response
-                    val output = inputStream.bufferedReader().readText()
-                    if (output.contains("Session alive.")) {
-                        profile.isSessionAlive = true
-                        Log.d("getSessionStatus", "Alive")
-
-                    }
-                    Log.d(
-                        "getSessionStatus",
-                        "Server response: $output for ${profile.sshUsername} ${profile.sshHost}, ${profile.sshPort}"
-                    )
-
-                    channel.disconnect()
-                    session.disconnect()
-                } catch (e: Exception) {
-                    Log.e(
-                        "Get session status err",
-                        "Error getting session status for ${profile.sshUsername} ${profile.sshHost}, ${profile.sshPort}",
-                        e
-                    )
-                }
-            }
-        }
-        return  profile.isSessionAlive
-    }
 
     /**********************************************************************************************
      * Saved servers
@@ -297,6 +306,7 @@ class ServerTabs(val activity: HomeActivity) {
         var profile = ServerProfile()
 
         init {
+            // StartConnection on click
             rootView.setOnClickListener { homeViewModel.startConnection(profile) }
 
             rootView.setOnCreateContextMenuListener { contextMenu, view, _ ->

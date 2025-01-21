@@ -1,5 +1,17 @@
+/*
+ * Copyright (c) 2025  Viktar Dubovik.
+ * Copyright (c) 2025  Bogdan Tolstik.
+ * Copyright (c) 2025  Daniil Zabauski.
+ * Copyright (c) 2025  Dzmitry Maslionchanka.
+ *
+ * SPDX-License-Identifier:  GPL-3.0-or-later
+ *
+ * See COPYING.txt for more details.
+ */
+
 package com.tcs.raat.vnc
 
+import android.util.Log
 import androidx.annotation.Keep
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -117,8 +129,19 @@ class VncClient(private val observer: Observer) {
      * Initializes VNC connection.
      */
     fun connect(host: String, port: Int) {
-        connected = nativeInit(nativePtr, host, port)
-        if (!connected) throw IOException(nativeGetLastErrorStr())
+        Log.d("VncConnect", "Host:port $host:$port")
+        try {
+            connected = nativeInit(nativePtr, host, port)
+            if (!connected) {
+                val error = nativeGetLastErrorStr()
+                val errorMessage = "Failed to connect to $host:$port. Error: $error"
+                Log.d("VncConnect", errorMessage)
+                throw IOException(errorMessage)
+            }
+        } catch (e: Exception) {
+            Log.d("VncConnect", "Error occurred during connection to $host:$port", e)
+            throw e
+        }
     }
 
     /**

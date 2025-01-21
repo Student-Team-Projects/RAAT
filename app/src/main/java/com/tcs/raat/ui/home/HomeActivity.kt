@@ -1,4 +1,8 @@
 /*
+ * Copyright (c) 2025  Viktar Dubovik.
+ * Copyright (c) 2025  Bogdan Tolstik.
+ * Copyright (c) 2025  Daniil Zabauski.
+ * Copyright (c) 2025  Dzmitry Maslionchanka.
  * Copyright (c) 2020  Gaurav Ujjwal.
  *
  * SPDX-License-Identifier:  GPL-3.0-or-later

@@ -1,4 +1,8 @@
 /*
+ * Copyright (c) 2025  Viktar Dubovik.
+ * Copyright (c) 2025  Bogdan Tolstik.
+ * Copyright (c) 2025  Daniil Zabauski.
+ * Copyright (c) 2025  Dzmitry Maslionchanka.
  * Copyright (c) 2020  Gaurav Ujjwal.
  *
  * SPDX-License-Identifier:  GPL-3.0-or-later
@@ -16,12 +20,16 @@ import androidx.lifecycle.Transformations
 import androidx.lifecycle.viewModelScope
 import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.JSch
+import com.jcraft.jsch.Session
 import com.tcs.raat.model.ServerProfile
 import com.tcs.raat.vnc.Discovery
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import com.tcs.raat.ui.home.getSessionStatus
+
 
 class HomeViewModel(app: Application) : BaseViewModel(app) {
 
@@ -57,6 +65,11 @@ class HomeViewModel(app: Application) : BaseViewModel(app) {
      * Can be used to highlight the new profile in UI.
      */
     val profileInsertedEvent = LiveEvent<ServerProfile>()
+
+    /**
+     * Fired when a profile is updated in database
+     */
+    val profileUpdatedEvent = LiveEvent<ServerProfile>()
 
     /**
      * Fired when a profile is deleted from database.
@@ -120,32 +133,45 @@ class HomeViewModel(app: Application) : BaseViewModel(app) {
     }
 
     fun onCloseSessionProfile(profile: ServerProfile) {
-        CoroutineScope(Dispatchers.IO).launch {
+        viewModelScope.launch {
+            var exception: Exception? = null
+            var session: Session? = null
+
             try {
-                val jsch = JSch()
-                Log.d("Close session raat", "${profile.sshUsername} ${profile.sshHost}, ${profile.sshPort}")
-                val session = jsch.getSession(profile.sshUsername, profile.sshHost, profile.sshPort)
+                withContext(Dispatchers.IO) {
+                    val jsch = JSch()
+                    Log.d("CloseSessionRaat", "${profile.sshUsername} ${profile.sshHost}, ${profile.sshPort}")
+                    session = jsch.getSession(profile.sshUsername, profile.sshHost, profile.sshPort)
+                    session?.setPassword(profile.sshPassword)
+                    session?.setConfig("StrictHostKeyChecking", "no")
+                    session?.timeout = 10000
+                    session?.connect()
 
-                session.setPassword(profile.sshPassword)
-                session.setConfig("StrictHostKeyChecking", "no")
-                session.timeout = 10000
+                    val channel = session?.openChannel("exec") as ChannelExec
+                    val port = if (profile.port <= 5900) profile.port + 5900 else profile.port
+                    Log.d("CloseSessionRaat", "raat-server-request kill-session --rfb_port=$port")
 
-                session.connect()
-
-                val channel = session.openChannel("exec") as ChannelExec
-                val port = if (profile.port <= 5900) profile.port + 5900 else profile.port
-                Log.d("Close session raat", "raat-server-request kill-session --rfb_port=$port")
-
-                channel.setCommand("raat-server-request kill-session --rfb_port=$port")
-
-                channel.connect()
-                channel.disconnect()
-                session.disconnect()
-
-                profile.isSessionAlive = false
-                onEditProfile(profile);
+                    channel.setCommand("raat-server-request kill-session --rfb_port=$port")
+                    val inputStream = channel.inputStream
+                    channel.connect()
+                    delay(1000)
+                    val output = inputStream.bufferedReader().readText()
+                    Log.d("CloseSessionRaat", "Server response: $output for ${profile.sshUsername} ${profile.sshHost}, ${profile.sshPort}")
+                    channel.disconnect()
+                }
             } catch (e: Exception) {
-                Log.e("Close session error", "Error closing session", e)
+                exception = e
+                Log.e("CloseSessionRaat", "Error closing session for ${profile.sshUsername} ${profile.sshHost}, ${profile.sshPort}", e)
+            } finally {
+                session?.disconnect()
+            }
+
+            withContext(Dispatchers.Main) {
+                if (exception == null) {
+                    Log.d("CloseSessionRaat", "Session closed for ${profile.sshUsername} ${profile.sshHost}, ${profile.sshPort}")
+                    getSessionStatus(profile)
+                    updateProfile(profile)
+                }
             }
         }
     }
@@ -163,6 +189,7 @@ class HomeViewModel(app: Application) : BaseViewModel(app) {
 
     fun updateProfile(profile: ServerProfile) = asyncMain {
         serverProfileDao.update(profile)
+        profileUpdatedEvent.fire(profile)
     }
 
     fun deleteProfile(profile: ServerProfile) = asyncMain {
