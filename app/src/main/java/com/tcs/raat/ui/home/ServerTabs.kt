@@ -1,4 +1,8 @@
 /*
+ * Copyright (c) 2025  Viktar Dubovik.
+ * Copyright (c) 2025  Bogdan Tolstik.
+ * Copyright (c) 2025  Daniil Zabauski.
+ * Copyright (c) 2025  Dzmitry Maslionchanka.
  * Copyright (c) 2023  Hubert Zięba.
  * Copyright (c) 2023  Justyna Jaworska.
  * Copyright (c) 2021  Gaurav Ujjwal.
@@ -10,6 +14,7 @@
 
 package com.tcs.raat.ui.home
 
+import android.util.Log
 import android.view.*
 import androidx.core.view.forEach
 import androidx.recyclerview.widget.DiffUtil
@@ -20,6 +25,8 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import com.jcraft.jsch.ChannelExec
+import com.jcraft.jsch.JSch
 import com.tcs.raat.R
 import com.tcs.raat.databinding.ServerDiscoveryBinding
 import com.tcs.raat.databinding.ServerDiscoveryItemBinding
@@ -28,6 +35,66 @@ import com.tcs.raat.databinding.ServerSavedItemBinding
 import com.tcs.raat.model.ServerProfile
 import com.tcs.raat.ui.home.ServerTabs.PagerAdapter.ViewHolder
 import com.tcs.raat.viewmodel.HomeViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+
+fun getSessionStatus(profile: ServerProfile): Boolean {
+    profile.isSessionAlive = false
+    runBlocking {
+        withContext(Dispatchers.IO) {
+            try {
+                val jsch = JSch()
+                val session = jsch.getSession(profile.sshUsername, profile.sshHost, profile.sshPort)
+
+                session.setPassword(profile.sshPassword)
+                session.setConfig("StrictHostKeyChecking", "no")
+                session.timeout = 10000
+
+                session.connect()
+
+                val channel = session.openChannel("exec") as ChannelExec
+                val port = if (profile.port <= 5900) profile.port + 5900 else profile.port
+
+                // For getting status:
+                channel.setCommand("raat-server-request get-session-status --rfb_port=$port")
+
+                // Capture the output
+                val inputStream = channel.inputStream
+                channel.connect()
+
+                // Read server response
+                val output = inputStream.bufferedReader().readText()
+                if (output.contains("Session alive.")) {
+                    profile.isSessionAlive = true
+                    Log.d("getSessionStatus", "Alive")
+
+                } else {
+                    profile.isSessionAlive = false
+                    Log.d("getSessionStatus", "Dead")
+                }
+                Log.d(
+                    "getSessionStatus",
+                    "Server response: $output for ${profile.sshUsername} ${profile.sshHost}, ${profile.sshPort}"
+                )
+
+                channel.disconnect()
+                session.disconnect()
+            } catch (e: Exception) {
+                Log.e(
+                    "Get session status err",
+                    "Error getting session status for ${profile.sshUsername} ${profile.sshHost}, ${profile.sshPort}",
+                    e
+                )
+            }
+        }
+    }
+    return  profile.isSessionAlive
+}
+
+
 
 /**
  * This class creates and manages tabs in [HomeActivity].
@@ -120,7 +187,14 @@ class ServerTabs(val activity: HomeActivity) {
         binding.serversRv.adapter = adapter
         binding.serversRv.setHasFixedSize(true)
 
-        activity.viewModel.serverProfiles.observe(activity) { adapter.submitList(it) }
+        activity.viewModel.serverProfiles.observe(activity) { profiles ->
+            profiles.forEach { profile ->
+                Log.d("SavedServers2", "Profile added: $profile")
+                getSessionStatus(profile)
+                Log.d("SavedServers23", "${profile.isSessionAlive}")
+            }
+            adapter.submitList(profiles)
+        }
         return binding.root
     }
 
@@ -151,6 +225,11 @@ class ServerTabs(val activity: HomeActivity) {
             override fun areItemsTheSame(old: ServerProfile, new: ServerProfile) = (old.ID == new.ID)
             override fun areContentsTheSame(old: ServerProfile, new: ServerProfile) = (old == new)
         }
+
+        // Add this method to refresh the data
+        fun updateData(newProfiles: List<ServerProfile>) {
+            submitList(newProfiles)
+        }
     }
 
 
@@ -168,7 +247,12 @@ class ServerTabs(val activity: HomeActivity) {
         binding.discoveredRv.adapter = adapter
         binding.discoveredRv.setHasFixedSize(true)
 
-        activity.viewModel.discovery.servers.observe(activity) { adapter.submitList(it) }
+        activity.viewModel.serverProfiles.observe(activity) { profiles ->
+            profiles.forEach { profile ->
+                profile.isSessionAlive = getSessionStatus(profile)
+            }
+            adapter.submitList(profiles)
+        }
 
         return binding.root
     }
@@ -222,6 +306,7 @@ class ServerTabs(val activity: HomeActivity) {
         var profile = ServerProfile()
 
         init {
+            // StartConnection on click
             rootView.setOnClickListener { homeViewModel.startConnection(profile) }
 
             rootView.setOnCreateContextMenuListener { contextMenu, view, _ ->
@@ -236,6 +321,7 @@ class ServerTabs(val activity: HomeActivity) {
             when (item.itemId) {
                 R.id.edit -> homeViewModel.onEditProfile(profile)
                 R.id.duplicate -> homeViewModel.onDuplicateProfile(profile)
+                R.id.close_session -> homeViewModel.onCloseSessionProfile(profile)
                 R.id.delete -> homeViewModel.deleteProfile(profile)
                 R.id.copy_host -> copyToClipboard(profile.host)
                 R.id.copy_name -> copyToClipboard(profile.name)

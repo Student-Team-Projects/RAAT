@@ -1,4 +1,8 @@
 /*
+ * Copyright (c) 2025  Viktar Dubovik.
+ * Copyright (c) 2025  Bogdan Tolstik.
+ * Copyright (c) 2025  Daniil Zabauski.
+ * Copyright (c) 2025  Dzmitry Maslionchanka.
  * Copyright (c) 2023  Hubert Zięba.
  * Copyright (c) 2020  Gaurav Ujjwal.
  *
@@ -25,6 +29,7 @@ import com.tcs.raat.vnc.VncClient
 import kotlinx.coroutines.*
 import java.io.IOException
 import java.lang.ref.WeakReference
+import com.tcs.raat.ui.home.getSessionStatus
 
 /**
  * ViewModel for VncActivity
@@ -213,20 +218,26 @@ class VncViewModel(app: Application) : BaseViewModel(app), VncClient.Observer {
 
         session.setPassword(profile.sshPassword)
         session.setConfig("StrictHostKeyChecking", "no")
-        session.timeout = 10000
+        session.timeout = 12000
 
         session.connect()
 
         val channel = session.openChannel("exec") as ChannelExec
         val port = if (profile.port <= 5900) profile.port+5900 else profile.port
-        Log.d("Start Raat Server", "raat-server ${profile.password} $port ${profile.geometry} ${profile.desktopEnv}")
+        Log.d("StartRaatServer", "raat-server-request open-session --vnc_password=${profile.password} --rfb_port=$port --geometry=${profile.geometry} --de_choice=${profile.desktopEnv}")
 
-        channel.setCommand("raat-server ${profile.password} $port ${profile.geometry} ${profile.desktopEnv}")
+        channel.setCommand("raat-server-request open-session --vnc_password=${profile.password} --rfb_port=$port --geometry=${profile.geometry} --de_choice=${profile.desktopEnv}")
+        // debug
+        val inputStream = channel.inputStream
 
         channel.connect()
-        delay(7000)
+        delay(2000)
+        // Read server response
+        val output = inputStream.bufferedReader().readText()
+        Log.d("StartRaatServer", "Server response: $output for ${profile.sshUsername} ${profile.sshHost}, ${profile.sshPort}")
         channel.disconnect()
         session.disconnect()
+        Log.d("StartRaatServer", "Session Status: ${getSessionStatus(profile)}")
 
     }
 
