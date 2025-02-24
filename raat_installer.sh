@@ -2,43 +2,41 @@
 
 set -e  # Stop the script on error
 
-echo "RAAT Installer: Automatic APK and server installation on Arch Linux"
+# Updating system(could be necessary to find packages)
+# sudo pacman -Syu
 
-# 1. Check that the system is Arch Linux
-if ! grep -q "Arch" /etc/os-release; then
-    echo "Error: This script supports only Arch Linux"
-    exit 1
-fi
+# Refreshing mirrors and databases
+sudo pacman -S reflector
+sudo reflector --latest 10 --sort rate --save /etc/pacman.d/mirrorlist
+sudo pacman -Syyu
 
-#2. Install dependencies (Android SDK, Gradle, JDK, AUR helper)
-echo "Installing dependencies..."
-sudo pacman -S --needed --noconfirm \
-    jdk-openjdk gradle android-sdk android-platform-tools git yay
+# Installing Java SDK
+sudo pacman -S jdk11-openjdk
 
-# 3. Clone and build the Android client (from RAAT-main)
-echo "📲 Cloning the client-side (Android)..."
-rm -rf ~/raat-client
-git clone https://github.com/Student-Team-Projects/RAAT-main.git ~/raat-client
-cd ~/raat-client
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+java -version
 
-echo "⚙️ Building the APK..."
+# Installing AUR helper
+sudo pacman -S --needed base-devel git
+git clone https://aur.archlinux.org/yay.git
+cd yay
+makepkg -si
+
+# Installing Android SDK
+yay -S android-studio
+
+# Set path to the installed SDK, needed to build the application
+export ANDROID_HOME=~/Android/Sdk # placed here by default
+# export ANDROID_HOME=/opt/android-sdk # Could land here
+
+# Download the application repo
+rm -rf RAAT
+git clone https://github.com/Student-Team-Projects/RAAT.git
+cd RAAT
+
+# Building the application
 ./gradlew assembleRelease
 
-APK_PATH=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
-if [[ -f "$APK_PATH" ]]; then
-    echo "APK successfully built: $APK_PATH"
-else
-    echo "Error: APK was not built!"
-    exit 1
-fi
-cd ~  # Return to the home directory
-
-# 4. Install the server-side (`raat-server`) via AUR
+# Install the server-side (`raat-server`) via AUR
 echo "Installing the server-side..."
 yay -S --noconfirm raat-server
-
-# 5. Final instructions for the user
-echo "Installation completed!"
-echo "To start the server, run: raat-server"
-echo "To install the APK on Android, connect your phone and run:"
-echo "  adb install $APK_PATH"
